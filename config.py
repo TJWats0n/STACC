@@ -18,3 +18,22 @@ class Config:
     corpus_size_factor = 4
 
     num_topics = 10
+
+    pyMABED_args_detect_event = {
+        'i': None,
+        'k': 10,
+        'sw': 'pyMABED/stopwords/twitter_en.txt',
+        'sep': '\t',
+        'o': 'results/pyMABED_visu.p',
+        'maf': 10,
+        'mrf': 0.4,
+        'tsl': 30,
+        'p': 10,
+        't': 0.6,
+        's': 0.6
+    }
+
+    pyMABED_args_built_ui = {
+        'i': 'results/pyMABED_visu.p',
+        'o': '../results/ui'
+    }

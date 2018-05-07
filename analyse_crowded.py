@@ -1,6 +1,11 @@
 from config import Config
 import pandas as pd
 import os
+from pyMABED import detect_events
+from pyMABED import build_event_browser
+import sys
+
+
 
 def spatial_selection(place, tweets):
     xmax, xmin, ymax, ymin = get_boundaries(place[1], Config.radius)
@@ -49,25 +54,21 @@ def data_prep(tweets):
 
 def run_pyMABED(file_name):
 
-    cmd_detect_events = 'python detect_events.py --o pyMABED_visu.p ' +\
-                   '../' + Config.results + file_name + ' ' + str(Config.num_topics)
+    Config.pyMABED_args_detect_event['i'] = Config.results + file_name
 
-    cmd_built_ui = 'python build_event_browser.py --o ../' + Config.results+ '/visu pyMABED_visu.p'
-
-    os.system(cmd_detect_events)
-    os.system(cmd_built_ui)
+    detect_events.main(Config.pyMABED_args_detect_event)
+    build_event_browser.main(Config.pyMABED_args_built_ui)
     print('pyMABED is done.')
 
 def main(tweets, crowded_places):
     tweets = data_prep(tweets)
     file_name = 'related_tweets.csv'
-    os.chdir("pyMABED/")
 
     for entry in crowded_places:
         related_tweets = spatial_selection(entry, tweets)
         related_tweets = temporal_selection(entry, related_tweets)
 
-        related_tweets.to_csv('../'+Config.results + file_name, sep='\t', encoding='utf-8')
+        related_tweets.to_csv(Config.results + file_name, sep='\t', encoding='utf-8')
 
         run_pyMABED(file_name)
 
