@@ -51,6 +51,4 @@ def calc_grid(tweets):
     # Location of a tweet is translated from latitudes&longitudes to an x,y code which represents one cell in the grid
     tweets["grid"] = tweets.apply(lambda x: city_map.get_grid(x['lat'], x['lon']), axis=1)
 
-    tweets = tweets[tweets['grid'].notnull()]
-
-    return tweets
+    return tweets[tweets['grid'].notnull()]

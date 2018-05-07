@@ -30,7 +30,7 @@ def write_to_new_file(file_name, lines):
 
 def main():
 
-    for file_name in [f for f in os.listdir(Config.data) if f.endswith('.csv')]:
+    for file_name in [f for f in os.listdir(Config.data) if (f.endswith('.csv')) and (f.find('preprocessed') < 1)]:
 
         out_filename = file_name.split('.')[0] + '_preprocessed.csv'
         csv_out = open(Config.data + out_filename, mode='w')  # opens csv file to write to
