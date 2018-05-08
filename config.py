@@ -18,6 +18,7 @@ class Config:
     corpus_size_factor = 4
 
     num_topics = 10
+    overlap = 0.8
 
     pyMABED_args_detect_event = {
         'i': None,

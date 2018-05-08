@@ -1,9 +1,9 @@
 from config import Config
 import pandas as pd
-import os
 from pyMABED import detect_events
 from pyMABED import build_event_browser
-import sys
+import provide_tweets
+import pickle
 
 
 
@@ -64,15 +64,17 @@ def main(tweets, crowded_places):
     tweets = data_prep(tweets)
     file_name = 'related_tweets.csv'
 
-    for entry in crowded_places:
-        related_tweets = spatial_selection(entry, tweets)
-        related_tweets = temporal_selection(entry, related_tweets)
-
-        related_tweets.to_csv(Config.results + file_name, sep='\t', encoding='utf-8')
-
+    for place in crowded_places:
+        # related_tweets = spatial_selection(place, tweets)
+        # related_tweets = temporal_selection(place, related_tweets)
+        #
+        # related_tweets.to_csv(Config.results + file_name, sep='\t', encoding='utf-8')
+        #
         run_pyMABED(file_name)
 
+        events = pickle.load(open(Config.pyMABED_args_detect_event['o'], 'rb'))
 
+        provide_tweets.calc_overlap(events, place)
 
 
 

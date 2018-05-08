@@ -30,7 +30,6 @@ def index():
 event_descriptions = []
 impact_data = []
 
-
 def main(args):
     print('Loading events from %s...' % args['i'])
     global mabed
