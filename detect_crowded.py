@@ -4,10 +4,11 @@ from config import Config
 
 
 # ================================ helper functions ============================================
-def get_lengt_of_timeseries(tweets, oldest_tweet):
-    #determine length of timeseries
-    time_range = tweets.index.max().ceil('{0}Min'.format(Config.interval)) - oldest_tweet
-    amount_intervalls = int(time_range.total_seconds() / 60 / Config.interval) + 1 # +1 because label of buckets in timeseries will be right
+def get_lengt_of_timeseries(tweets, oldest_tweet, interval=Config.interval):
+    time_range = tweets.index.max() - oldest_tweet
+
+    # +1 because the end of data does not fit the intervals seamless but still should be included
+    amount_intervalls = int(time_range.total_seconds() / 60 / interval) + 1
 
     return amount_intervalls
 
@@ -30,28 +31,28 @@ def create_timestamp(timeframe, oldest):
 
 # ================================ main functions ============================================
 
-def create_time_series(tweets):
+def create_time_series(tweets, interval=Config.interval, map_size=Config.map_size):
     oldest_tweet = tweets.index.min().floor(freq='1H')
-    length_timeseries = get_lengt_of_timeseries(tweets, oldest_tweet)
+    length_timeseries = get_lengt_of_timeseries(tweets, oldest_tweet, interval)
 
-    #create timeseries
-    timeseries = [np.zeros((Config.map_size, Config.map_size), dtype=np.int) for point_of_time in range(int(length_timeseries))]
+    timeseries = [np.zeros((map_size, map_size), dtype=np.int) for point_of_time in range(int(length_timeseries))]
+    timeseries = np.array(timeseries)
 
-
-    #Count tweets in intervall in same grid
     tweets['index'] = tweets.index
-    grouped_tweets = tweets.groupby([pd.Grouper(key='index', freq='{0}min'.format(Config.interval), label='right'), 'grid']).count()
+    grouped_tweets = tweets.groupby([pd.Grouper(key='index', freq='{0}min'.format(interval), label='right'), 'grid']).count()
     grouped_tweets = grouped_tweets.rename(columns={'text': 'amount_tweets'})
 
     for index, row in grouped_tweets.iterrows():
 
-        #determine where to insert timestamp in timeseries
-        current_point_of_time = index[0].ceil('{0}Min'.format(Config.interval))
-        time_difference = current_point_of_time - oldest_tweet
-        timeframe = int(time_difference.total_seconds() // (60 * Config.interval))
+        time_difference = index[0] - oldest_tweet
+
+        # -1 to use it as index, otherwise the last element would be out of bound
+        timeframe = int(time_difference.total_seconds() // (60 * interval)) -1
 
         #fill the timeseries from tweet corpus
-        timeseries[timeframe][int(index[1][1])][int(index[1][0])] = row[0]
+        timeseries[timeframe,int(index[1][1]),int(index[1][0])] = row[0]
+
+    #timeseries = timeseries[1:,:,:]
 
     return timeseries, oldest_tweet
 

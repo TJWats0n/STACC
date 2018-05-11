@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from config import Config
 from map_grid import MapGrid
+from tqdm import tqdm
 
 
 def load_data():
@@ -14,7 +15,8 @@ def load_data():
     preprocessed_files = [Config.data + document for document in os.listdir(Config.data) if document.find('preprocessed') > 0]
 
     all_tweets = pd.DataFrame()
-    for Table in preprocessed_files:
+    tqdm.write('loading historic data...')
+    for Table in tqdm(preprocessed_files):
         df_tmp = pd.read_table(Table, sep='\t', header=0, parse_dates=["date"], index_col="date")
 
         # drop all entries which do not have lat & lon
@@ -43,10 +45,10 @@ def filter_spam(tweets):
     return filtered_tweets
 
 
-def calc_grid(tweets):
+def calc_grid(tweets, map_size = Config.map_size):
 
     # MapGrid creates a grid as overlay for a city.
-    city_map = MapGrid(Config.city, Config.map_size, Config.map_size)
+    city_map = MapGrid(Config.city, map_size, map_size)
 
     # Location of a tweet is translated from latitudes&longitudes to an x,y code which represents one cell in the grid
     tweets["grid"] = tweets.apply(lambda x: city_map.get_grid(x['lat'], x['lon']), axis=1)

@@ -5,23 +5,35 @@ import convertJson
 import analyse_crowded
 import pandas as pd
 import ast
+from tqdm import tqdm
 import pickle
+
 
 # ================================== Phase 1 - Load data ==========================================================
 
 
 if config.Config.data_type == 'static':
-    print('Loading data...')
-    #transform tweets from JSON to csv format
-    #convertJson.main()
+    tqdm.write('Phase 1')
+    with tqdm(total=4) as pbar:
 
-    tweets = preprocess_data.load_data()
+        #transform tweets from JSON to csv format
+        #convertJson.main()
 
-    tweets = preprocess_data.filter_spam(tweets)
+        tweets = preprocess_data.load_data()
+        tqdm.write('Phase 1')
+        pbar.update(1)
 
-    tweets = preprocess_data.calc_grid(tweets)
+        tweets = preprocess_data.filter_spam(tweets)
+        tqdm.write('Phase 1')
+        pbar.update(1)
 
-    tweets.to_csv('tweets.csv', sep='\t', encoding='utf-8')
+        tweets = preprocess_data.calc_grid(tweets)
+        tqdm.write('Phase 1')
+        pbar.update(1)
+
+        tweets.to_csv('tweets.csv', sep='\t', encoding='utf-8')
+        tqdm.write('Phase 1')
+        pbar.update(1)
 
 # if config.Config.data_type == 'stream':
     # implement stream here
