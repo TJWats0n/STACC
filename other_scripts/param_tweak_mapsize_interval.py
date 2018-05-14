@@ -3,11 +3,8 @@ import numpy as np
 from tqdm import tqdm
 import pickle
 import detect_crowded
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
-import plotly.offline as py
-import plotly.graph_objs as go
 
 
 def calc_avg(timeseries, mapsize):
@@ -34,67 +31,65 @@ def calc_fill_percentage(timeseries, mapsize):
 
     return not_zero_counter/all_numbers
 
+def construct_axis():
+    x = []
+    y = []
+    avg = []
+    perc = []
 
-def calc_metric(avg, percentage, interval, mapsize):
-    return (percentage * (avg + mapsize))/interval
+    for mapsize in mapsizes:
+        print('mapsize:', mapsize)
+        for interval in intervals:
+            print('interval:', interval)
+            # grid_tweets = preprocess_data.calc_grid(filtered_tweets, map_size=mapsize)
+            #
+            # pickle.dump(grid_tweets, open('other_scripts/grid_tweets_' + str(mapsize) + '_' + str(interval) + '.p', 'wb'))
+            grid_tweets = pickle.load(open('other_scripts/grid_tweets_' + str(mapsize) + '_' + str(interval) + '.p', 'rb'))
+
+            timeseries, oldest = detect_crowded.create_time_series(grid_tweets, interval=interval, map_size=mapsize)
+
+            single_avg = calc_avg(timeseries, mapsize)
+            # percentage of how many
+            percentage = calc_fill_percentage(timeseries, mapsize)
+
+            x.append(interval)
+            y.append(mapsize)
+            avg.append(single_avg)
+            perc.append(percentage)
+
+    #invert y to make plot more readable
+    y = y[::-1]
+
+    return x,y,avg,perc
+
 
 def calc_metric_alt(avg, percentage, interval, mapsize):
     return percentage*(avg+mapsize-(interval/100))
 
 
-def draw_graph(x,y,z, mapsize, interval):
+def metric(x, y, percentage, avg):
+    return (percentage * (avg + x))/y
+
+
+def draw_surface(x,y, percentage, avg):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(x,y,z, c='skyblue', s=20)
+    x1, y1 = np.meshgrid(x, y)
+    zs = np.array([metric(x, y, percentage, avg) for x, y, percentage, avg in zip(np.ravel(x1), np.ravel(y1), percentage, avg)])
+    z = zs.reshape(x1.shape)
 
+    ax.plot_surface(x1, y1, z, cmap=cm.coolwarm)
 
-def draw_surface(x,y,z,mapsize, interval):
-    fig = plt.figure()
-    ax = Axes3D(fig)
-    surf = ax.plot_trisurf(x,y,z,cmap=plt.cm, linewidth=0.1, vmin=0, vmax=6)
-    fig.colorbar(surf, shrink=0.5, aspect=5)
+    ax.set_xticks([8, 16, 32])
+    ax.set_xticklabels(["8", "16", "32"])
 
-labels = [1, 3, 6, 9, 11]
+    ax.set_yticks([60, 180, 360, 540, 660])
+    ax.set_yticklabels(["60", "180", "360", "540", "660"])
 
-def draw_plotly(z,y,x):
-    data = [go.Surface(z=z)]
-    # Xaxis = go.XAxis(
-    #     tickmode='array',
-    #     ticktext=labels,
-    #     tickvals=[0, 1, 2, 3, 4],
-    #     title='This is another testing Title'
-    # )
-
-    go.Figure()
-
-    layout = go.Layout(
-        title='Test',
-        autosize=False,
-        width=500,
-        height=500,
-        margin=dict(
-            l=65,
-            r=50,
-            b=65,
-            t=90,
-        ),
-        yaxis = dict(
-            tickmode='array',
-            tickvals=[1,2,3],
-            ticktext=[8, 16, 32],
-            title='This is a testing title'
-        ),
-        xaxis = dict(
-            tickmode='array',
-            tickvals=[1,2,3,4,5],
-            ticktext=[60, 180, 360, 540, 660],
-            title='This is a testing title',
-            showticklabels=True
-        )
-    )
-    fig = go.Figure(data=data, layout=layout)
-    py.plot(fig, filename='test.html')
-
+    ax.set_xlabel('Mapsize in Cells')
+    ax.set_ylabel('Interval in Min')
+    ax.set_zlabel('Metric')
+    return z
 
 mapsizes = [8, 16, 32]
 intervals = [60, 180, 360, 540, 660]
@@ -107,65 +102,31 @@ def main():
     # pickle.dump(filtered_tweets, open('other_scripts/filtered_tweets.p', 'wb'))
 
     filtered_tweets = pickle.load(open('other_scripts/filtered_tweets.p', 'rb'))
-    x = []
-    y = []
-    z = []
-    avg_ = []
-    perc = []
 
-    # for mapsize in mapsizes:
-    #     print('mapsize:', mapsize)
-    #     for interval in intervals:
-    #         print('interval', interval)
-    #         # grid_tweets = preprocess_data.calc_grid(filtered_tweets, map_size=mapsize)
-    #         #
-    #         # pickle.dump(grid_tweets, open('other_scripts/grid_tweets_' + str(mapsize) + '_' + str(interval) + '.p', 'wb'))
-    #         grid_tweets = pickle.load(open('other_scripts/grid_tweets_' + str(mapsize) + '_' + str(interval) + '.p', 'rb'))
-    #
-    #         timeseries, oldest = detect_crowded.create_time_series(grid_tweets, interval=interval, map_size=mapsize)
-    #
-    #         avg = calc_avg(timeseries, mapsize)
-    #         # percentage of how many
-    #         percentage = calc_fill_percentage(timeseries, mapsize)
-    #
-    #         metric = calc_metric(avg, percentage, interval, mapsize )
-    #
-    #         x.append(interval)
-    #         y.append(mapsize)
-    #         z.append(metric*100)
-    #         avg_.append(avg)
-    #         perc.append(percentage)
-    #
-    # y = y[::-1]
-    #
+    x,y,avg,perc = construct_axis()
+
     # obj = {
     #     'x': x,
     #     'y': y,
-    #     'z': z,
-    #     'avg': avg_,
+    #     'avg': avg,
     #     'perc': perc
     # }
-    #
     # pickle.dump(obj,open('obj.p', 'wb'))
-    mapsize = None
-    interval = None
 
     obj = pickle.load(open('obj.p', 'rb'))
 
     x = obj['x']
     y = obj['y']
-    z = obj['z']
-    z = np.array([z[0:5], z[5:10], z[10:15]])
-    avg_ = obj['avg']
+    avg = obj['avg']
     perc = obj['perc']
 
-    draw_plotly(z,y,x)
+    z = draw_surface(x=mapsizes, y=intervals, percentage=perc, avg=avg)
     print(x)
     print(y)
     print(z)
-    print(avg_)
+    print(avg)
     print(perc)
-    #plt.show()
+    plt.show()
 
 if __name__ == '__main__':
     main()
