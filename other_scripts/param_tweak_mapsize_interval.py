@@ -4,6 +4,8 @@ from tqdm import tqdm
 import pickle
 import detect_crowded
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 from matplotlib import cm
 
 
@@ -63,8 +65,8 @@ def construct_axis():
     return x,y,avg,perc
 
 
-def calc_metric_alt(avg, percentage, interval, mapsize):
-    return percentage*(avg+mapsize-(interval/100))
+def calc_metric_alt(x, y, percentage, avg):
+    return (3*percentage*(2*avg+4*x))
 
 
 def metric(x, y, percentage, avg):
@@ -75,10 +77,11 @@ def draw_surface(x,y, percentage, avg):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     x1, y1 = np.meshgrid(x, y)
-    zs = np.array([metric(x, y, percentage, avg) for x, y, percentage, avg in zip(np.ravel(x1), np.ravel(y1), percentage, avg)])
+    zs = np.array([calc_metric_alt(x, y, percentage, avg) for x, y, percentage, avg in zip(np.ravel(x1), np.ravel(y1), percentage, avg)])
     z = zs.reshape(x1.shape)
 
-    ax.plot_surface(x1, y1, z, cmap=cm.coolwarm)
+    ax.plot_surface(x1, y1, z, cmap=cm.coolwarm, linewidth=0.5, edgecolors='grey')
+    ax.set_title('(3*percentage*(2*avg+4*x))/y')
 
     ax.set_xticks([8, 16, 32])
     ax.set_xticklabels(["8", "16", "32"])
@@ -86,8 +89,8 @@ def draw_surface(x,y, percentage, avg):
     ax.set_yticks([60, 180, 360, 540, 660])
     ax.set_yticklabels(["60", "180", "360", "540", "660"])
 
-    ax.set_xlabel('Mapsize in Cells')
-    ax.set_ylabel('Interval in Min')
+    ax.set_xlabel('x Mapsize in Cells')
+    ax.set_ylabel('y: Interval in Min')
     ax.set_zlabel('Metric')
     return z
 
@@ -100,11 +103,11 @@ def main():
     # data = preprocess_data.load_data()
     # filtered_tweets = preprocess_data.filter_spam(data)
     # pickle.dump(filtered_tweets, open('other_scripts/filtered_tweets.p', 'wb'))
-
-    filtered_tweets = pickle.load(open('other_scripts/filtered_tweets.p', 'rb'))
-
-    x,y,avg,perc = construct_axis()
-
+    #
+    # filtered_tweets = pickle.load(open('other_scripts/filtered_tweets.p', 'rb'))
+    #
+    # x,y,avg,perc = construct_axis()
+    #
     # obj = {
     #     'x': x,
     #     'y': y,
