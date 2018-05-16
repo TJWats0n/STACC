@@ -7,7 +7,7 @@ class Config:
 
 
     spam_filter = ["#Hiring", "#hiring", "hiring", "Hiring", "#job",
-                    "Just posted a photo", "Just posted a video", "Good morning, New York!",
+                    "Just posted a photo", "Just posted a video", "Foto appena pubblicata", "Good morning, New York!",
                     "Cleared:", "Updated:", "UV", "Incident on", "Construction on"]
 
     map_size = 10

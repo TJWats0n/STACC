@@ -7,8 +7,8 @@ from config import Config
 def get_lengt_of_timeseries(tweets, oldest_tweet, interval=Config.interval):
     time_range = tweets.index.max() - oldest_tweet
 
-    # +1 because the end of data does not fit the intervals seamless but still should be included
-    amount_intervalls = int(time_range.total_seconds() / 60 / interval) + 1
+    # ceil because the end of data does not fit the intervals seamless but still should be included
+    amount_intervalls = int(np.ceil(time_range.total_seconds() / 60 / interval))
 
     return amount_intervalls
 
@@ -24,15 +24,16 @@ def determine_sliding_window(timeseries):
 
     return sliding_window_size
 
-def create_timestamp(timeframe, oldest):
+def create_timestamp(timeframe, first_bucket):
     delta = timeframe * Config.interval
-    timestamp = oldest + pd.Timedelta('{0} min'.format(delta))
+    timestamp = first_bucket + pd.Timedelta('{0} min'.format(delta))
     return timestamp
 
 # ================================ main functions ============================================
 
 def create_time_series(tweets, interval=Config.interval, map_size=Config.map_size):
     oldest_tweet = tweets.index.min().floor(freq='1H')
+    first_bucket = oldest_tweet + pd.Timedelta('{}m'.format(Config.interval))
     length_timeseries = get_lengt_of_timeseries(tweets, oldest_tweet, interval)
 
     timeseries = [np.zeros((map_size, map_size), dtype=np.int) for point_of_time in range(int(length_timeseries))]
@@ -44,18 +45,17 @@ def create_time_series(tweets, interval=Config.interval, map_size=Config.map_siz
 
     for index, row in grouped_tweets.iterrows():
 
-        time_difference = index[0] - oldest_tweet
+        time_difference = index[0] - first_bucket
 
         # -1 to use it as index, otherwise the last element would be out of bound
-        timeframe = int(time_difference.total_seconds() // (60 * interval)) -1
+        timeframe = int(time_difference.total_seconds() // (60 * interval))
 
         #fill the timeseries from tweet corpus
         timeseries[timeframe,int(index[1][1]),int(index[1][0])] = row[0]
 
     #timeseries = timeseries[1:,:,:]
 
-    return timeseries, oldest_tweet
-
+    return timeseries, first_bucket
 
 def determine_crowded_per_cell_timeseries(timeseries):
 
@@ -85,7 +85,7 @@ def determine_crowded_per_cell_timeseries(timeseries):
     return crowded_cells
 
 
-def determine_crowded_per_timeframe(crowded_cells, timeseries, oldest_tweets):
+def determine_crowded_per_timeframe(crowded_cells, timeseries, first_bucket):
     crowded_places = []
 
     #create distribution of timeframe a crowded cell appears in, calculate std and compare std to crowded cell value
@@ -100,7 +100,7 @@ def determine_crowded_per_timeframe(crowded_cells, timeseries, oldest_tweets):
         std = np.std(timeframe_distribution)
 
         if amount_tweets > (3 * std):
-            timestamp = create_timestamp(timeframe, oldest_tweets)
+            timestamp = create_timestamp(timeframe, first_bucket)
             crowded_places.append((timestamp, (float(index_grid[1]), float(index_grid[2])), amount_tweets))
 
     return crowded_places
