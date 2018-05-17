@@ -85,7 +85,7 @@ def run_pyMABED(file_name):
     Config.pyMABED_args_detect_event['i'] = Config.results + file_name
 
     detect_events.main(Config.pyMABED_args_detect_event)
-    build_event_browser.main(Config.pyMABED_args_built_ui)
+    #build_event_browser.main(Config.pyMABED_args_built_ui)
     print('pyMABED is done.')
 
 def filter_topics(top_k_topics, place):
@@ -111,6 +111,9 @@ def search_tweets(event, related_tweets):
 
         if matches >= 3:
             example_tweets.append((row['screen_name'], row['text']))
+
+    if not example_tweets:
+        return None
 
     return get_random_sample(example_tweets)
 
