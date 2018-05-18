@@ -53,9 +53,8 @@ def create_time_series(tweets, interval=Config.interval, map_size=Config.map_siz
         #fill the timeseries from tweet corpus
         timeseries[timeframe,int(index[1][1]),int(index[1][0])] = row[0]
 
-    #timeseries = timeseries[1:,:,:]
-
     return timeseries, first_bucket
+
 
 def determine_crowded_per_cell_timeseries(timeseries):
 
@@ -85,22 +84,18 @@ def determine_crowded_per_cell_timeseries(timeseries):
     return crowded_cells
 
 
-def determine_crowded_per_timeframe(crowded_cells, timeseries, first_bucket):
+def check_amount_tweets(crowded_cells, first_bucket):
     crowded_places = []
 
-    #create distribution of timeframe a crowded cell appears in, calculate std and compare std to crowded cell value
     for index_grid, amount_tweets in crowded_cells.items():
         timeframe = int(index_grid[0])
-        timeframe_distribution = []
 
-        for y in range(Config.map_size):
-            for x in range(Config.map_size):
-                timeframe_distribution.append(timeseries[timeframe][y][x])
-
-        std = np.std(timeframe_distribution)
-
-        if amount_tweets > (3 * std):
+        if amount_tweets > 50:
             timestamp = create_timestamp(timeframe, first_bucket)
             crowded_places.append((timestamp, (float(index_grid[1]), float(index_grid[2])), amount_tweets))
 
     return crowded_places
+
+
+
+

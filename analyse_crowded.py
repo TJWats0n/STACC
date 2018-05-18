@@ -24,6 +24,9 @@ def get_details(tweets, crowded_places):
 
         related_events = filter_topics(top_k_topics, place)
 
+        if not related_events:
+            continue
+
         related_events_with_tweets = add_tweets(related_events, related_tweets)
 
         places_events_tweets[str(place)] = related_events_with_tweets
