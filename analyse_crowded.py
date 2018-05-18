@@ -1,7 +1,6 @@
 from config import Config
 import pandas as pd
 from pyMABED import detect_events
-from pyMABED import build_event_browser
 import relevant_topic_detection
 import random
 import pickle
@@ -16,7 +15,7 @@ def get_details(tweets, crowded_places):
         print('Getting details for place {}')
         related_tweets = spatial_selection(place, tweets)
         related_tweets = temporal_selection(place, related_tweets)
-        related_tweets.to_csv(Config.results + file_name, sep='\t', encoding='utf-8')
+        related_tweets.to_csv('other_files/' + file_name, sep='\t', encoding='utf-8')
 
         run_pyMABED(file_name)
 
@@ -88,7 +87,6 @@ def run_pyMABED(file_name):
     Config.pyMABED_args_detect_event['i'] = Config.results + file_name
 
     detect_events.main(Config.pyMABED_args_detect_event)
-    #build_event_browser.main(Config.pyMABED_args_built_ui)
     print('pyMABED is done.')
 
 def filter_topics(top_k_topics, place):

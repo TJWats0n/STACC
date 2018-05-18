@@ -1,12 +1,12 @@
 import preprocess_data
-import config
 import detect_crowded
 import convertJson
 import analyse_crowded
 import pandas as pd
 import ast
 import pickle
-
+import json
+from config import Config
 temp_files = 'other_files/'
 
 # ================================== Phase 1 - Load data ==========================================================
@@ -27,7 +27,7 @@ if previous_map_size != config.Config.map_size:
 
     tweets.to_csv(temp_files+'tweets.csv', sep='\t', encoding='utf-8')
 
-    pickle.dump(config.Config.map_size, open(temp_files+'previous_map_size.p', 'wb'))
+    pickle.dump(Config.map_size, open(temp_files+'previous_map_size.p', 'wb'))
 
 # ================================== Phase 2 - Detect Crowded =====================================================
 print('Detecting crowd...')
@@ -59,4 +59,5 @@ tweets = pd.read_csv(temp_files+'tweets.csv',
                          sep='\t')
 
 related_events_sample = analyse_crowded.get_details(tweets, crowded_places)
+pickle.dump(json.dump(related_events_sample),open(Config.results+'master_object.p', 'wb'))
 print('end')
