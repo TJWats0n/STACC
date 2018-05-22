@@ -16,7 +16,7 @@ temp_files = 'other_files/'
 
 previous_map_size = pickle.load(open('other_files/previous_map_size.p', 'rb'))
 
-if previous_map_size != config.Config.map_size:
+if previous_map_size != Config.map_size:
     print('Mapsize was changed, therefore data must be preprocessed again. This can take a minute or two.')
 
     tweets = preprocess_data.load_data()
@@ -59,5 +59,5 @@ tweets = pd.read_csv(temp_files+'tweets.csv',
                          sep='\t')
 
 related_events_sample = analyse_crowded.get_details(tweets, crowded_places)
-pickle.dump(json.dump(related_events_sample),open(Config.results+'master_object.p', 'wb'))
+pickle.dump(related_events_sample, open(Config.results+'master_object.p', 'wb'))
 print('end')

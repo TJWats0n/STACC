@@ -17,7 +17,7 @@ def check_topic_relevant(topic, crowded_place, top_k_topics):
         relevant_topic = ({'magnitude': topic[0],
                                 'start_end': (event_start.strftime('%Y-%m-%d %H:%M:%S'),
                                               event_end.strftime('%Y-%m-%d %H:%M:%S')),
-                                'main_words': topic[2],
+                                'main_words': [topic[2]], #put in list for later json use
                                 'rel_words': related_words})
 
         return relevant_topic
