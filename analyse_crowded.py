@@ -4,7 +4,7 @@ from pyMABED import detect_events
 import relevant_topic_detection
 import random
 import pickle
-import tqdm
+
 
 def get_details(tweets, crowded_places):
     tweets = data_prep(tweets)
@@ -12,7 +12,7 @@ def get_details(tweets, crowded_places):
     places_events_tweets = {}
 
     for place in crowded_places:
-        print('Getting details for place {}')
+        print('Getting details for place {}'.format(place))
         related_tweets = spatial_selection(place, tweets)
         related_tweets = temporal_selection(place, related_tweets)
         related_tweets.to_csv('other_files/' + file_name, sep='\t', encoding='utf-8')
@@ -28,7 +28,7 @@ def get_details(tweets, crowded_places):
 
         related_events_with_tweets = add_tweets(related_events, related_tweets)
 
-        places_events_tweets[str(place)] = related_events_with_tweets
+        places_events_tweets[place] = related_events_with_tweets
 
     return places_events_tweets
 
@@ -84,7 +84,7 @@ def temporal_selection(place, tweets):
 
 def run_pyMABED(file_name):
 
-    Config.pyMABED_args_detect_event['i'] = Config.results + file_name
+    Config.pyMABED_args_detect_event['i'] = 'other_files/' + file_name
 
     detect_events.main(Config.pyMABED_args_detect_event)
     print('pyMABED is done.')
