@@ -1,2 +1,4 @@
 *.csv
 pyMABED/corpus
+.idea/*
+.DS_Store
