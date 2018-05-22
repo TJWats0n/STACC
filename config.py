@@ -25,7 +25,7 @@ class Config:
         'k': 10,
         'sw': 'pyMABED/stopwords/twitter_en.txt',
         'sep': '\t',
-        'o': 'results/pyMABED_visu.p',
+        'o': 'other_files/top_events.p',
         'maf': 10,
         'mrf': 0.4,
         'tsl': 30,
