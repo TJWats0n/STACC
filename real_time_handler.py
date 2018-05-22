@@ -9,6 +9,7 @@ from cloudant.query import Query
 from real_time_config import RTConfig
 import pandas as pd
 import math
+import analyse_crowded
 import preprocess_data
 import detect_crowded
 import threading
@@ -47,7 +48,18 @@ def get_tweets_with_geo(database):
     df.set_index('timestamp', inplace=True)
     return df
 
+def get_file(path,file_name):
+    # open timeseries file
+    try:
+        file = open(path + file_name, 'rb')
+    except FileNotFoundError:
+        file = open(path + file_name, 'rb')
+
+    return pickle.load(file)
+
 def handler():
+    t = pd.Timestamp(datetime.now())
+    latest_bucket = t.floor('{}min'.format(Config.interval)) #Assuming this will be very close to the (but still after) the wished timestamp
     print('Analyse latest data.')
     database = connect_to_db()
     tweets = get_tweets_with_geo(database)
@@ -59,29 +71,28 @@ def handler():
     timeslice, oldest = detect_crowded.create_time_series(grid_tweets)
     timeslice = timeslice[1]
 
-    #open timeseries file
-    try:
-        file = open('other_files/timeseries.p', 'rb')
-    except FileNotFoundError:
-        file = open('other_files/timeseries.p', 'wb')
-
-    timeseries = pickle.load(file)
+    timeseries = get_file('other_files', 'timeseries.p')
 
     if len(timeseries) < Config.sliding_window:
-
-        #try to construct from files
-        #saving tweets to files ensures to rerun the real_time set up with different interval without waiting for 30 days again
-
         print('The timeseries is to small to detect crowded places. '
               'Please wait ', Config.sliding_window - len(timeseries), ' intervals more.')
         return
 
-    crowded_places = detect_crowded.determine_crowded_per_cell_timeseries(timeseries,
-                                                                          real_time_flag=True,
-                                                                          timeslice=timeslice)
-    # crowded_places = detect_crowded...
-    print('sth')
+    crowded_places = detect_crowded.determine_crowded_per_cell_timeseries(timeseries)
 
+    first_bucket = latest_bucket - pd.Timedelta(minutes=(len(timeseries) + Config.interval))
+    crowded_places = detect_crowded.check_amount_tweets(crowded_places, first_bucket)
+    related_events_sample = analyse_crowded.get_details(grid_tweets, crowded_places)
+
+    print('sth')
+    master_object = get_file(Config.interval, 'master_object.p')
+
+    for key, value in related_events_sample.items():
+        master_object[key]=value
+
+    pickle.dump(master_object, open(Config.results+'master_object.p', 'wb'))
+
+    print('Processing for {0} finished. Next analysis is taking place at {1}'.format(latest_bucket, latest_bucket+Config.interval))
 
 def scheduler():
     print('Scheduler started...')
@@ -92,7 +103,8 @@ def scheduler():
         time.sleep(1)
 
 def start_tweet_collection():
-    print('sth')
+    #stream API start
+    print('')
 
 
 def main():
