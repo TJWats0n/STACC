@@ -16,7 +16,7 @@ def z_score(mean, std, element):
     return (element-mean)/std
 
 def determine_sliding_window(timeseries):
-    sliding_window_size = (Config.sliding_window * 24 * 60)/Config.interval
+    sliding_window_size = int((Config.sliding_window * 24 * 60)/Config.interval)
 
     if sliding_window_size > len(timeseries):
         print('Warning: sliding window is larger as data. Will use all data for sliding window.')
@@ -59,23 +59,27 @@ def create_time_series(tweets, interval=Config.interval, map_size=Config.map_siz
 def determine_crowded_per_cell_timeseries(timeseries):
 
     crowded_cells = {}
-    historic_window_size = determine_sliding_window(timeseries)
+    window_size = determine_sliding_window(timeseries)
 
     for y in range(Config.map_size):
         for x in range(Config.map_size):
             cell_timeseries = []
 
-            for timeframe in range(len(timeseries) - historic_window_size,len(timeseries), 1):
+            for timeframe in range(len(timeseries)):
                 cell_timeseries.append(timeseries[timeframe][y][x])
 
             #use only practical distributions
             if len(cell_timeseries)/2 < cell_timeseries.count(0):
                 continue
 
-            mean = np.mean(cell_timeseries)
-            std = np.std(cell_timeseries)
-
             for index, amount_tweets in enumerate(cell_timeseries):
+                if index < window_size:
+                    mean = np.mean(cell_timeseries[:window_size])
+                    std = np.std(cell_timeseries[:window_size])
+                else:
+                    mean = np.mean(cell_timeseries[(index - window_size):index])
+                    std = np.std(cell_timeseries[(index - window_size):index])
+
                 if amount_tweets < mean:
                     continue
                 if 3 < z_score(mean, std, amount_tweets):

@@ -13,7 +13,7 @@ class Config:
     map_size = 10
     interval = 360  # in minutes
     city = 'manhattan'
-    sliding_window = 90 # how many days
+    sliding_window = 15 # how many days
     radius = 2
     corpus_size_factor = 4
 
