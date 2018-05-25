@@ -8,6 +8,7 @@ from requests.adapters import HTTPAdapter
 from cloudant.query import Query
 from real_time_config import RTConfig
 import pandas as pd
+import numpy as np
 import math
 import analyse_crowded
 import preprocess_data
@@ -72,6 +73,8 @@ def handler():
     timeslice = timeslice[1]
 
     timeseries = get_file('other_files', 'timeseries.p')
+
+    np.append(timeseries, np.expand_dims(timeslice, axis=0), axis=0)
 
     if len(timeseries) < Config.sliding_window:
         print('The timeseries is to small to detect crowded places. '
