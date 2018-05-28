@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 import pickle
 from config import Config
 import pandas as pd
+from collections import OrderedDict
 
 
 app = Flask(__name__)
@@ -16,45 +17,68 @@ def get_places():
     return jsonify(places_helper())
 
 
-@app.route('/api/v1.0/events/<place_id>', methods=['GET'])
-def get_events_for_place(place_id):
-    places = places_helper()
-    return jsonify(events_helper(places, place_id))
+@app.route('/api/v1.0/events/<place_time>/<float:place_x>/<float:place_y>/<int:place_amount>', methods=['GET'])
+def get_events_for_place(place_time, place_x, place_y, place_amount):
+    key = (pd.Timestamp(place_time), (place_x, place_y), place_amount)
+    return jsonify(events_helper(key))
 
 
+@app.route('/api/v1.0/tweets/<place_time>/<float:place_x>/<float:place_y>/<int:place_amount>/<int:event_id>', methods=['GET'])
+def get_tweets(place_time, place_x, place_y, place_amount, event_id):
+    key = (pd.Timestamp(place_time), (place_x, place_y), place_amount)
+    return jsonify(tweets_helper(key, event_id))
 
+def tweets_helper(key, event_id):
+    data = load_file()
 
-@app.route('/api/v1.0/tweets/<place_id>/<event_id>', methods=['GET'])
-def get_tweets_for_event(place_id, event_id):
-    places = places_helper()
-    events = events_helper(places, place_id)
-    return jsonify({str(index): tweet for index, tweet in enumerate(events[event_id]['tweets'])})
+    try:
+        return data[key][event_id]['tweets']
+    except IndexError:
+        return {'message': 'There are only less than {} events.'.format(event_id)} #construct json with key 'message' --> should be displayed in browser
+    except KeyError:
+        return {'message': 'There is no crowded place corresponding to {}'.format(key)}
+    except TypeError:
+        return {'message': 'There is no file to load crowded places from.'}
+
 
 def places_helper():
-    with open(Config.results + 'master_object.p', 'rb') as file:
-        data = pickle.load(file)
+    data = load_file()
 
-    places = {}
-    for index, key in enumerate(data.keys()):
-        places[str(index)] = {'timestamp': key[0],
-                              'x': key[1][0],
-                              'y': key[1][1],
-                              'tweet_amount': str(key[2])}
-    return places
+    places = OrderedDict()
+    try:
+        for index, key in enumerate(sorted(data.keys())):
+            places[str(index)] = {'timestamp': key[0],
+                                  'x': key[1][0],
+                                  'y': key[1][1],
+                                  'tweet_amount': str(key[2])}
+        return places
 
-def events_helper(places, place_id):
-    key = (pd.Timestamp(places[place_id]['timestamp']), (float(places[place_id]['x']), float(places[place_id]['y'])),
-           int(places[place_id]['tweet_amount']))
-    with open(Config.results + 'master_object.p', 'rb') as file:
-        data = pickle.load(file)
+    except AttributeError:
+        return {'message': 'There is no file to load crowded places from.'}
+
+
+def events_helper(key):
+    data = load_file()
 
     events = {}
-    for index, event in enumerate(data[key]):
-        events[str(index)] = {'start_end': [event['start_end'][0], event['start_end'][1]],
-                             'main_words': event['main_words'],
-                             'rel_words': event['rel_words']}
+    try:
+        for index, event in enumerate(data[key]):
+            events[str(index)] = {'start_end': [event['start_end'][0], event['start_end'][1]],
+                                 'main_words': event['main_words'],
+                                 'rel_words': event['rel_words']}
 
-    return events
+        return events
+    except KeyError:
+        return {'message': 'There is no crowded place corresponding to {}'.format(key)}
+    except TypeError:
+        return {'message': 'There is no file to load crowded places from.'}
+
+def load_file():
+    try:
+        with open(Config.results + 'master_object.p', 'rb') as file:
+            return pickle.load(file)
+    except FileNotFoundError:
+        return
 
 
 if __name__ == "__main__":
