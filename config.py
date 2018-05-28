@@ -10,15 +10,15 @@ class Config:
                     "Just posted a photo", "Just posted a video", "Foto appena pubblicata", "Good morning, New York!",
                     "Cleared:", "Updated:", "UV", "Incident on", "Construction on"]
 
-    map_size = 10
+    map_size = 24
     interval = 360  # in minutes
     city = 'manhattan'
-    sliding_window = 15 # how many days
-    radius = 2
+    sliding_window = 20 # how many days
+    radius = 3
     corpus_size_factor = 4
 
     num_topics = 10
-    overlap = 0.8
+    overlap = 0.7
 
     pyMABED_args_detect_event = {
         'i': None,
