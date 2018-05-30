@@ -56,7 +56,7 @@ def create_time_series(tweets, interval=Config.interval, map_size=Config.map_siz
     return timeseries, first_bucket
 
 
-def determine_crowded_per_cell_timeseries(timeseries):
+def determine_crowded_per_cell_timeseries(timeseries, real_time_flag=False):
 
     crowded_cells = {}
     window_size = determine_sliding_window(timeseries)
@@ -65,8 +65,12 @@ def determine_crowded_per_cell_timeseries(timeseries):
         for x in range(Config.map_size):
             cell_timeseries = []
 
-            for timeframe in range(len(timeseries)):
-                cell_timeseries.append(timeseries[timeframe][y][x])
+            if real_time_flag == False:
+                for timeframe in range(len(timeseries)):
+                    cell_timeseries.append(timeseries[timeframe][y][x])
+            else:#check only the last frame
+                for timeframe in range(len(timeseries)-window_size,len(timeseries),1):
+                    cell_timeseries.append(timeseries[timeframe][y][x])
 
             #use only practical distributions
             if len(cell_timeseries)/2 < cell_timeseries.count(0):

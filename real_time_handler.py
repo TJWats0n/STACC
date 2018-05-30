@@ -7,6 +7,7 @@ from cloudant.client import Cloudant
 from requests.adapters import HTTPAdapter
 from cloudant.query import Query
 from real_time_config import RTConfig
+import tweet_collection
 import pandas as pd
 import numpy as np
 import math
@@ -29,11 +30,12 @@ def connect_to_db():
     database = client['streamed_tweets']
     return database
 
-def get_tweets_with_geo(database):
+def get_tweets_with_geo(database, until_then):
     df = pd.DataFrame()
+    from_then = until_then - pd.Timedelta(minutes=Config.interval)
+    RTConfig.selector['created_at']['$gte'] = from_then.strftime('%a %b %d %H:%M:%S +0000 %Y')
+    RTConfig.selector['created_at']['$lte'] = until_then.strftime('%a %b %d %H:%M:%S +0000 %Y')
     query = Query(database, selector=RTConfig.selector, fields=RTConfig.fields)
-
-    #the time selection must be still integrated in the selector
 
     with query.custom_result() as rslt:
         for entry in rslt:
@@ -63,29 +65,32 @@ def handler():
     latest_bucket = t.floor('{}min'.format(Config.interval)) #Assuming this will be very close to the (but still after) the wished timestamp
     print('Analyse latest data.')
     database = connect_to_db()
-    tweets = get_tweets_with_geo(database)
+    tweets = get_tweets_with_geo(database,latest_bucket)
     filtered_tweets = preprocess_data.filter_spam(tweets)
     grid_tweets = preprocess_data.calc_grid(filtered_tweets)
 
     #create_time_series() can be used but here yields only one time slice
     # as the provided data is only the size of one interval
     timeslice, oldest = detect_crowded.create_time_series(grid_tweets)
-    timeslice = timeslice[1]
 
-    timeseries = get_file('other_files', 'timeseries.p')
+    timeseries = get_file('other_files/', 'timeseries.p')
 
-    np.append(timeseries, np.expand_dims(timeslice, axis=0), axis=0)
+    np.append(timeseries, timeslice, axis=0)
 
     if len(timeseries) < Config.sliding_window:
         print('The timeseries is to small to detect crowded places. '
               'Please wait ', Config.sliding_window - len(timeseries), ' intervals more.')
         return
 
-    crowded_places = detect_crowded.determine_crowded_per_cell_timeseries(timeseries)
+    crowded_places = detect_crowded.determine_crowded_per_cell_timeseries(timeseries, real_time_flag=True)
 
-    first_bucket = latest_bucket - pd.Timedelta(minutes=(len(timeseries) + Config.interval))
+    first_bucket = latest_bucket - pd.Timedelta(minutes=(len(timeseries) * Config.interval))
     crowded_places = detect_crowded.check_amount_tweets(crowded_places, first_bucket)
     related_events_sample = analyse_crowded.get_details(grid_tweets, crowded_places)
+
+    if related_events_sample is None:
+        print('No new crowded places detected.')
+        return
 
     print('sth')
     master_object = get_file(Config.interval, 'master_object.p')
@@ -99,16 +104,14 @@ def handler():
 
 def scheduler():
     print('Scheduler started...')
-    schedule.every(1).minutes.do(handler)
+    # schedule.every(1).minutes.do(handler)
+
+    schedule.every(Config.interval).minutes.do(handler)
 
     while 1:
         schedule.run_pending()
-        time.sleep(1)
-
-def start_tweet_collection():
-    #stream API start
-    print('')
-
+        time.sleep(Config.interval)
+        # time.sleep(1)
 
 def main():
     print('start')
@@ -119,13 +122,15 @@ def main():
 
     print('Collection of tweets will start at {}'.format(start_collect_tweets))
 
-    delay = 0
+    # delay = 0
 
-    t = threading.Timer(delay, start_tweet_collection)
+    t = threading.Timer(delay, tweet_collection.main())
     t.daemon=True
     t.start()
 
-    threading.Timer(delay + Config.interval, scheduler).start()
+    # delay + Config.interval
+
+    threading.Timer(0, scheduler).start()
 
 if __name__ == "__main__":
     main()
