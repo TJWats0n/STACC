@@ -22,7 +22,7 @@ font = {'family': 'serif',
 # r = [0.52, 0.53, 0.72, 1.00]
 # optimum = 3
 
-# #intercal
+# #interval
 # parameter_name = 'Interval Size'
 # labels = ['60', '180', '360', '480', '720']
 # ticks = [1, 3, 6, 8, 12]
@@ -33,11 +33,11 @@ font = {'family': 'serif',
 
 # #sliding window
 # parameter_name = 'Sliding Window'
-# labels = ['5', '10', '15', '20']
-# ticks = [1,2,3,4]
-# p = [0.66, 0.56, 0.58, 0.63]
-# mu = [15, 13, 16, 16]
-# r = [0.79, 0.72, 0.84, 0.8]
+# labels = ['5', '10', '15', '20', '25']
+# ticks = [1,2,3,4,5]
+# p = [0.66, 0.56, 0.58, 0.63, 0.58]
+# mu = [15, 13, 16, 16, 15]
+# r = [0.79, 0.72, 0.84, 0.8, 0.83]
 # optimum = 4
 
 # #Corpus Size

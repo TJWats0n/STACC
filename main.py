@@ -44,6 +44,8 @@ crowded_places = detect_crowded.determine_crowded_per_cell_timeseries(timeseries
 
 crowded_places = detect_crowded.check_amount_tweets(crowded_places, first_bucket)
 
+print('{} crowded places identified'.format(len(crowded_places)))
+
 pickle.dump(crowded_places, open(temp_files+'cp.p','wb'))
 
 
