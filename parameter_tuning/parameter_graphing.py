@@ -13,17 +13,17 @@ def normalize_unique_events(events):
 
 font = {'family': 'serif',
         'weight': 'normal'}
-#map
-parameter_name = 'Map Size'
-labels = ['8', '16', '24', '32']
-ticks = [1,2,3,4]
-p = [0.53, 0.63, 0.56, 0.38]
-mu = [11, 8, 13, 3]
-r = [0.52, 0.53, 0.72, 1.00]
-optimum = 3
+# #map
+# parameter_name = 'map'
+# labels = ['8', '16', '24', '32']
+# ticks = [1,2,3,4]
+# p = [0.53, 0.63, 0.56, 0.38]
+# mu = [11, 8, 13, 3]
+# r = [0.52, 0.53, 0.72, 1.00]
+# optimum = 3
 
-# #interval
-# parameter_name = 'Interval Size'
+# # #interval
+# parameter_name = 'interval'
 # labels = ['60', '180', '360', '480', '720']
 # ticks = [1, 3, 6, 8, 12]
 # p = [0, 0.33, 0.56, 0.45, 0.35]
@@ -32,7 +32,7 @@ optimum = 3
 # optimum = 6
 
 # #sliding window
-# parameter_name = 'Sliding Window'
+# parameter_name = 'window'
 # labels = ['5', '10', '15', '20', '25']
 # ticks = [1,2,3,4,5]
 # p = [0.66, 0.56, 0.58, 0.63, 0.58]
@@ -41,7 +41,7 @@ optimum = 3
 # optimum = 4
 
 # #Corpus Size
-# parameter_name = 'Corpus Size'
+# parameter_name = 'clength'
 # labels = ['0.5', '1', '2']
 # ticks = [1,2,3]
 # p = [0.67, 0.63, 0.89]
@@ -50,7 +50,7 @@ optimum = 3
 # optimum = 2
 
 # #Radius
-# parameter_name = 'Radius'
+# parameter_name = 'radius'
 # labels = ['1', '2', '3', '4']
 # ticks = [1,2,3,4]
 # p = [0.54, 0.63, 0.71, 0.70]
@@ -58,14 +58,14 @@ optimum = 3
 # r = [1, 0.8, 0.72, 0.65]
 # optimum = 3
 
-# #overlap
-# parameter_name = 'Overlap'
-# labels = ['0.6', '0.7', '0.8', '0.9']
-# ticks = [1,2,3,4]
-# p = [0.68, 0.72, 0.71, 0.71]
-# mu = [21, 21, 18, 16]
-# r = [0.63, 0.72, 0.72, 0.69]
-# optimum = 2 #at which tick is the optimum?
+#overlap
+parameter_name = 'overlap'
+labels = ['0.6', '0.7', '0.8', '0.9']
+ticks = [1,2,3,4]
+p = [0.68, 0.72, 0.71, 0.71]
+mu = [21, 21, 18, 16]
+r = [0.63, 0.72, 0.72, 0.69]
+optimum = 2 #at which tick is the optimum?
 
 
 def main():
@@ -101,7 +101,7 @@ def main():
     # ax.set_xlabel('Hour')
 
     plt.savefig('{}.pdf'.format(parameter_name), dpi=500, format='pdf')
-    plt.show()
+    #plt.show()
 
 
 if __name__ == '__main__':
