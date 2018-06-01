@@ -13,14 +13,14 @@ def normalize_unique_events(events):
 
 font = {'family': 'serif',
         'weight': 'normal'}
-# #map
-# parameter_name = 'Map Size'
-# labels = ['8', '16', '24', '32']
-# ticks = [1,2,3,4]
-# p = [0.53, 0.63, 0.56, 0.38]
-# mu = [11, 8, 13, 3]
-# r = [0.52, 0.53, 0.72, 1.00]
-# optimum = 3
+#map
+parameter_name = 'Map Size'
+labels = ['8', '16', '24', '32']
+ticks = [1,2,3,4]
+p = [0.53, 0.63, 0.56, 0.38]
+mu = [11, 8, 13, 3]
+r = [0.52, 0.53, 0.72, 1.00]
+optimum = 3
 
 # #interval
 # parameter_name = 'Interval Size'
@@ -58,14 +58,14 @@ font = {'family': 'serif',
 # r = [1, 0.8, 0.72, 0.65]
 # optimum = 3
 
-#overlap
-parameter_name = 'Overlap'
-labels = ['0.6', '0.7', '0.8', '0.9']
-ticks = [1,2,3,4]
-p = [0.68, 0.72, 0.71, 0.71]
-mu = [21, 21, 18, 16]
-r = [0.63, 0.72, 0.72, 0.69]
-optimum = 2 #at which tick is the optimum?
+# #overlap
+# parameter_name = 'Overlap'
+# labels = ['0.6', '0.7', '0.8', '0.9']
+# ticks = [1,2,3,4]
+# p = [0.68, 0.72, 0.71, 0.71]
+# mu = [21, 21, 18, 16]
+# r = [0.63, 0.72, 0.72, 0.69]
+# optimum = 2 #at which tick is the optimum?
 
 
 def main():
@@ -100,7 +100,7 @@ def main():
     # ax.set_xticks([i for i in range(0,24,2)])
     # ax.set_xlabel('Hour')
 
-    plt.savefig(parameter_name, dpi=500)
+    plt.savefig('{}.pdf'.format(parameter_name), dpi=500, format='pdf')
     plt.show()
 
 
