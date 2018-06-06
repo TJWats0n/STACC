@@ -1,29 +1,31 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 import pickle
 from config import Config
 import pandas as pd
 from collections import OrderedDict
+from flask_cors import CORS
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
+CORS(app)
 
 
 @app.route('/')
 def index():
-    return 'hello world'
+    return render_template('index.html')
 
 @app.route('/api/v1.0/places', methods=['GET'])
 def get_places():
     return jsonify(places_helper())
 
 
-@app.route('/api/v1.0/events/<place_time>/<float:place_x>/<float:place_y>/<int:place_amount>', methods=['GET'])
+@app.route('/api/v1.0/events/<place_time>/<int:place_x>/<int:place_y>/<int:place_amount>', methods=['GET'])
 def get_events_for_place(place_time, place_x, place_y, place_amount):
-    key = (pd.Timestamp(place_time), (place_x, place_y), place_amount)
+    key = (pd.Timestamp(place_time), (float(place_x), float(place_y)), place_amount)
     return jsonify(events_helper(key))
 
 
-@app.route('/api/v1.0/tweets/<place_time>/<float:place_x>/<float:place_y>/<int:place_amount>/<int:event_id>', methods=['GET'])
+@app.route('/api/v1.0/tweets/<place_time>/<int:place_x>/<int:place_y>/<int:place_amount>/<int:event_id>', methods=['GET'])
 def get_tweets(place_time, place_x, place_y, place_amount, event_id):
     key = (pd.Timestamp(place_time), (place_x, place_y), place_amount)
     return jsonify(tweets_helper(key, event_id))
@@ -48,8 +50,8 @@ def places_helper():
     try:
         for index, key in enumerate(sorted(data.keys())):
             places[str(index)] = {'timestamp': key[0],
-                                  'x': key[1][0],
-                                  'y': key[1][1],
+                                  'x': int(key[1][0]),
+                                  'y': int(key[1][1]),
                                   'tweet_amount': str(key[2])}
         return places
 

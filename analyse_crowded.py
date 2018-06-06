@@ -4,6 +4,7 @@ from pyMABED import detect_events
 import relevant_topic_detection
 import random
 import pickle
+import copy
 
 
 def get_details(tweets, crowded_places):
@@ -107,11 +108,15 @@ def add_tweets(related_events, related_tweets):
 
 def search_tweets(event, related_tweets):
     example_tweets = []
+    topic_words = copy.deepcopy(event['rel_words'])
+    for entry in event['main_words']:
+        topic_words.append(entry)
+
     for index, row in related_tweets.iterrows():
-        matches = sum(row['text'].lower().count(word) for word in event['rel_words'])
+        matches = sum(row['text'].lower().count(word) for word in topic_words)
 
         if matches >= 3:
-            example_tweets.append((row['screen_name'], row['text']))
+            example_tweets.append((row['text']))
 
     if not example_tweets:
         return None

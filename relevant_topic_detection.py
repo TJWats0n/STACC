@@ -9,15 +9,15 @@ def check_topic_relevant(topic, crowded_place, top_k_topics):
     if overlap > Config.overlap:
         related_words = []
         for related_word, weight in topic[3]:
+            if len(related_word)>25:
+                continue
             related_words.append(related_word)
 
-        # make searching related words easier for later
-        related_words.append(topic[2])
 
         relevant_topic = ({'magnitude': topic[0],
                                 'start_end': (event_start.strftime('%Y-%m-%d %H:%M:%S'),
                                               event_end.strftime('%Y-%m-%d %H:%M:%S')),
-                                'main_words': [topic[2]], #put in list for later json use
+                                'main_words': topic[2].split(','), #put in list for later json use
                                 'rel_words': related_words})
 
         return relevant_topic

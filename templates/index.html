@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>IX - ACC</title>
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.css' rel='stylesheet' />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='img/IX_small.png') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="{{ url_for('static', filename='map.js') }}"></script>
+</head>
+
+<body>
+  <div class="grid_container">
+    <h1 class="title mainbar">All past Events</h1>
+    <div id="places_container" class="places_container mainbar"></div>
+
+    <div class="footer mainbar">
+      <div class="about_wrapper" onclick=toggleAbout()>About</div>
+      </div>
+
+    <div id="map_wrapper" class="map_wrapper"></div>
+
+
+
+    <h1 class="titleII slider details"></h1>
+    <div id="details_container" class="details_container slider details"></div>
+    <div class="footerII slider details">
+      <img onclick="hideDetails()" id="back" src="{{ url_for('static', filename='img/back.png') }}">
+    </div>
+  </div>
+
+  <div class="brand">
+    <a href="https://www.youtube.com/watch?v=WA9vgFb4QIQ" target="_blank">
+      <img src="{{ url_for('static', filename='img/IX_large.png') }}">
+      </a>
+  </div>
+
+  <div class="mapbox_logo">
+    <a href="https://www.mapbox.com/" target="_blank">
+        <img src="{{ url_for('static', filename='img/mapbox_logo.png') }}">
+      </a>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+  </body>
+</html>
