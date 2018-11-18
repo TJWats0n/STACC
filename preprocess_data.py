@@ -12,7 +12,7 @@ def load_data():
     :return df: A dataframe of the whole dataset specified with only entries which provide lat & lon.
     """
 
-    preprocessed_files = [Config.data + document for document in os.listdir(Config.data) if document.find('preprocessed') > 0]
+    preprocessed_files = [Config.data + document for document in os.listdir(Config.prep_data) if document.find('preprocessed') > 0]
 
     all_tweets = pd.DataFrame()
     tqdm.write('loading historic data...')
