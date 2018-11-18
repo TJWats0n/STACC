@@ -6,6 +6,7 @@ from real_time_config import RTConfig
 from datetime import datetime
 import os
 import csv
+from config import Config
 
 
 class Listener(StreamListener):
@@ -19,17 +20,18 @@ class Listener(StreamListener):
             try:
                 now = datetime.now().date()
                 if Listener.current_date!= now:
-                    Listener.date_for_file = '{)-{}-{}'.format(now.year, now.month, now.day)
+                    Listener.current_date = now
+                    Listener.date_for_file = '{}-{}-{}'.format(now.year, now.month, now.day)
                     Listener.file_per_day = 0
                     Listener.filename = 'tweets_{}_{}.csv'.format(Listener.date_for_file, Listener.file_per_day)
 
-                if os.path.getsize('raw_data/{}'.format(Listener.filename)) > 80000000: #80MB
-                    Listener.file_per_day =+ 1
-                    Listener.filename = 'tweets_{}_{}.csv'.format(Listener.date_for_file, Listener.file_per_day)
-
-                with open(Listener.filename, 'a') as file:
+                with open('{}/{}'.format(Config.data, Listener.filename), 'a+') as file:
                     csvwriter = csv.writer(file)
-                    csvwriter.writerow(data)
+                    csvwriter.writerow([data])
+
+                if os.path.getsize('{}/{}'.format(Config.data, Listener.filename)) >= 80000000: #80MB
+                    Listener.file_per_day += 1
+                    Listener.filename = 'tweets_{}_{}.csv'.format(Listener.date_for_file, Listener.file_per_day)
 
             except Exception as e:
                 print('failed ondata,',str(e))
