@@ -33,7 +33,7 @@ def main():
     for file_name in [f for f in os.listdir(Config.data) if (f.endswith('.csv')) and (f.find('preprocessed') < 1)]:
 
         out_filename = file_name.split('.')[0] + '_preprocessed.csv'
-        csv_out = open(Config.data + out_filename, mode='w')  # opens csv file to write to
+        csv_out = open(Config.prep_data + out_filename, mode='w')  # opens csv file to write to
         writer = csv.writer(csv_out, delimiter='\t')  # create the csv writer object
 
         fields = ['date', 'text', 'screen_name', 'followers', 'friends', 'country', 'place_name', 'lat', 'lon', 'rt',
@@ -42,7 +42,7 @@ def main():
 
         #file_name=
         with open(Config.data + file_name, 'r') as f:
-            content = f.readlines()
+            reader = csv.reader(f)
             city = Config.city
             num_tw=0
             num_geo_tw=0
@@ -50,10 +50,10 @@ def main():
             w_num_geo_dub_tw=0
             num_ll_dub_tw=0
             coord_without_name=0
-            for line_json in content:
+            for row in reader:
                 #writes a row and gets the fields from the json object
                 #screen_name and followers/friends are found on the second level hence two get methods
-                line = json.loads(line_json)
+                line = json.loads(row[0])#row is a list with one string which is the json object required by json.loads
                 num_tw=num_tw+1
                 lat='NA'
                 long='NA'
