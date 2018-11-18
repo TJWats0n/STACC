@@ -2,7 +2,8 @@ class Config:
 
 
     data_type = 'static' #'stream' or 'static'
-    data = 'data/'
+    data = 'raw_data/'
+    prep_data = 'data/'
     results = 'results/'
 
 
