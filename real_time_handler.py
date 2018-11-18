@@ -1,19 +1,15 @@
 import schedule
 import time
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from config import Config
 from cloudant.client import Cloudant
 from requests.adapters import HTTPAdapter
 from cloudant.query import Query
 from real_time_config import RTConfig
-import tweet_collection
 import pandas as pd
 import numpy as np
 import math
-import analyse_crowded
-import preprocess_data
-import detect_crowded
+import analyse_crowded, preprocess_data, detect_crowded, tweet_collection
 import threading
 import pickle
 
