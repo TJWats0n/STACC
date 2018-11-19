@@ -16,7 +16,7 @@ def get_details(tweets, crowded_places):
         print('Getting details for place {}'.format(place))
         related_tweets = spatial_selection(place, tweets)
         related_tweets = temporal_selection(place, related_tweets)
-        related_tweets.to_csv('other_files/' + file_name, sep='\t', encoding='utf-8')
+        related_tweets.to_csv(Config.helper_files + file_name, sep='\t', encoding='utf-8')
 
         run_pyMABED(file_name)
 
@@ -85,7 +85,7 @@ def temporal_selection(place, tweets):
 
 def run_pyMABED(file_name):
 
-    Config.pyMABED_args_detect_event['i'] = 'other_files/' + file_name
+    Config.pyMABED_args_detect_event['i'] = Config.helper_files + file_name
 
     detect_events.main(Config.pyMABED_args_detect_event)
     print('pyMABED is done.')
