@@ -64,30 +64,40 @@ def determine_crowded_per_cell_timeseries(timeseries, real_time_flag=False):
     for y in range(Config.map_size):
         for x in range(Config.map_size):
             cell_timeseries = []
+            for timeframe in range(len(timeseries)):
+                cell_timeseries.append(timeseries[timeframe][y][x])
+            # else: #check only the last frame
+            #     for timeframe in range(len(timeseries)-window_size, len(timeseries),1):
+            #         cell_timeseries.append(timeseries[timeframe][y][x])
 
-            if real_time_flag == False:
-                for timeframe in range(len(timeseries)):
-                    cell_timeseries.append(timeseries[timeframe][y][x])
-            else:#check only the last frame
-                for timeframe in range(len(timeseries)-window_size,len(timeseries),1):
-                    cell_timeseries.append(timeseries[timeframe][y][x])
-
-            #use only practical distributions
+            #exclude distributions where more than half of entries are zero
             if len(cell_timeseries)/2 < cell_timeseries.count(0):
                 continue
 
-            for index, amount_tweets in enumerate(cell_timeseries):
-                if index < window_size:
-                    mean = np.mean(cell_timeseries[:window_size])
-                    std = np.std(cell_timeseries[:window_size])
-                else:
-                    mean = np.mean(cell_timeseries[(index - window_size):index])
-                    std = np.std(cell_timeseries[(index - window_size):index])
+            if real_time_flag == False:
+                for index, amount_tweets in enumerate(cell_timeseries):
+                    if index < window_size:
+                        mean = np.mean(cell_timeseries[:window_size])
+                        std = np.std(cell_timeseries[:window_size])
+                    #for the first timeframes distribution of
+                    # the first 'sliding-window timeframes' will be used
+                    else:
+                        mean = np.mean(cell_timeseries[(index - window_size):index])
+                        std = np.std(cell_timeseries[(index - window_size):index])
+
+                    if amount_tweets < mean:
+                        continue
+                    if 3 < z_score(mean, std, amount_tweets):
+                        crowded_cells[(index, x, y)] = amount_tweets
+            else:#check only last frame for new crowded places
+                mean = np.mean(cell_timeseries[:len(timeseries) - 1])
+                std = np.std(cell_timeseries[:len(timeseries) - 1])
+                amount_tweets = cell_timeseries[len(timeseries)]
 
                 if amount_tweets < mean:
                     continue
                 if 3 < z_score(mean, std, amount_tweets):
-                    crowded_cells[(index, x, y)] = amount_tweets
+                    crowded_cells[(len(timeseries), x, y)] = amount_tweets
 
     return crowded_cells
 
