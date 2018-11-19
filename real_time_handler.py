@@ -2,50 +2,15 @@ import schedule
 import time
 from datetime import datetime, timedelta
 from config import Config
-from cloudant.client import Cloudant
-from requests.adapters import HTTPAdapter
-from cloudant.query import Query
-from real_time_config import RTConfig
 import pandas as pd
 import numpy as np
 import math
-import analyse_crowded, preprocess_data, detect_crowded, tweet_collection
+import analyse_crowded, preprocess_data, detect_crowded, tweet_collection, convertJson
 import threading
 import pickle
 
 def ceil_dt(dt, delta):
     return datetime.min + math.ceil((dt - datetime.min) / delta) * delta
-
-def connect_to_db():
-    cloudant_cred = RTConfig.cloudant_cred
-    httpAdapter = HTTPAdapter(pool_connections=15, pool_maxsize=100)
-    client = Cloudant(cloudant_cred['username'], cloudant_cred['password'], url=cloudant_cred['url'],
-                      connect=True,
-                      adapter=httpAdapter)
-
-    database = client['streamed_tweets']
-    return database
-
-def get_tweets_with_geo(database, until_then):
-    df = pd.DataFrame()
-    from_then = until_then - pd.Timedelta(minutes=Config.interval)
-    RTConfig.selector['created_at']['$gte'] = from_then.strftime('%a %b %d %H:%M:%S +0000 %Y')
-    RTConfig.selector['created_at']['$lte'] = until_then.strftime('%a %b %d %H:%M:%S +0000 %Y')
-    query = Query(database, selector=RTConfig.selector, fields=RTConfig.fields)
-
-    with query.custom_result() as rslt:
-        for entry in rslt:
-            df = df.append({'screen_name': entry["user"]["screen_name"],
-                            "text": entry["text"],
-                            "timestamp": entry["created_at"],
-                            "lon": entry["geo"]["coordinates"][0],
-                            "lat": entry["geo"]["coordinates"][1]},
-                           ignore_index=True
-                           )
-
-    df['timestamp'] = pd.to_datetime(df['timestamp'], format='%a %b %d %H:%M:%S +%f %Y')
-    df.set_index('timestamp', inplace=True)
-    return df
 
 def get_file(path,file_name):
     # open timeseries file
@@ -60,8 +25,11 @@ def handler():
     t = pd.Timestamp(datetime.now())
     latest_bucket = t.floor('{}min'.format(Config.interval)) #Assuming this will be very close to the (but still after) the wished timestamp
     print('Analyse latest data.')
-    database = connect_to_db()
-    tweets = get_tweets_with_geo(database,latest_bucket)
+
+    convertJson.main() #transform json format of most recent tweets to csv format
+
+    tweets = preprocess_data.load_data()
+
     filtered_tweets = preprocess_data.filter_spam(tweets)
     grid_tweets = preprocess_data.calc_grid(filtered_tweets)
 
@@ -69,12 +37,14 @@ def handler():
     # as the provided data is only the size of one interval
     timeslice, oldest = detect_crowded.create_time_series(grid_tweets)
 
-    timeseries = get_file('other_files/', 'timeseries.p')
+    timeseries = get_file(Config.helper_files, 'timeseries.p')
 
     np.append(timeseries, timeslice, axis=0)
 
+    #remove first timeframe of timeseries to keep consistent length
+
     if len(timeseries) < Config.sliding_window:
-        print('The timeseries is to small to detect crowded places. '
+        print('The timeseries is too small to detect crowded places. '
               'Please wait ', Config.sliding_window - len(timeseries), ' intervals more.')
         return
 
@@ -92,11 +62,13 @@ def handler():
     master_object = get_file(Config.interval, 'master_object.p')
 
     for key, value in related_events_sample.items():
-        master_object[key]=value
+        master_object[key] = value
 
     pickle.dump(master_object, open(Config.results+'master_object.p', 'wb'))
 
-    print('Processing for {0} finished. Next analysis is taking place at {1}'.format(latest_bucket, latest_bucket+Config.interval))
+    #some deletion logic for raw data and outdated prep data
+
+    print('Processing for {0} finished. Next analysis is taking place at {1}'.format(latest_bucket, latest_bucket + Config.interval))
 
 def scheduler():
     print('Scheduler started...')
