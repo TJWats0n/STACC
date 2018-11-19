@@ -3,6 +3,7 @@ import os
 from config import Config
 from map_grid import MapGrid
 from tqdm import tqdm
+import sys
 
 
 def load_data():
@@ -11,12 +12,20 @@ def load_data():
 
     :return df: A dataframe of the whole dataset specified with only entries which provide lat & lon.
     """
+    if Config.data_type == 'static':
+        print('Collecting static data')
+        prep_files = [Config.prep_data + document for document in os.listdir(Config.prep_data) if document.find('preprocessed') > 0]
+    elif Config.data_type == 'stream':
+        print('Collecting stream data')
+        files_in_dir = [Config.prep_data + document for document in os.listdir(Config.prep_data)]
+        prep_files = max(files_in_dir, key=os.path.getctime()) #in stream scenario only the latest file is needed as others have been processed before
+    else:
+        sys.exit('Please choose a "data_type" in the config of either "static" or "stream"')
 
-    preprocessed_files = [Config.data + document for document in os.listdir(Config.prep_data) if document.find('preprocessed') > 0]
 
     all_tweets = pd.DataFrame()
-    tqdm.write('loading historic data...')
-    for Table in tqdm(preprocessed_files):
+    tqdm.write('loading data...')
+    for Table in tqdm(prep_files):
         df_tmp = pd.read_table(Table, sep='\t', header=0, parse_dates=["date"], index_col="date")
 
         # drop all entries which do not have lat & lon
