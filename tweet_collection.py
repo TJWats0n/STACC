@@ -1,11 +1,8 @@
 from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
-import time
-from real_time_config import RTConfig
 from datetime import datetime
-import os
-import csv
+import os, csv, time
 from config import Config
 
 
@@ -47,15 +44,14 @@ class Listener(StreamListener):
 def main():
 
     while True:
-        for k,v in RTConfig.keys.items():
+        for k,v in Config.API_keys.items():
             print('switching to {}'.format(k))
             
             auth = OAuthHandler(v['ckey'], v['csecret'])
             auth.set_access_token(v['atoken'], v['asecret'])
             try:
                 twitterstream = Stream(auth, Listener())
-                nyc_box = [-74.09523,40.720721,-73.832932,40.898463]
-                twitterstream.filter(locations=nyc_box)
+                twitterstream.filter(locations=Config.grid_box)
             except:
                 pass
 
