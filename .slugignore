@@ -1,0 +1,2 @@
+#slugignore to ignore files not necessary for heroku build
+/data
