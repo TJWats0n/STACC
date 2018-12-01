@@ -5,7 +5,4 @@ tqdm==4.23.0
 flask==0.12.2
 flask_cors==3.0.3
 tweepy==3.6.0
-matplotlib==2.2.2
-cloudant==2.8.1
-networkx==2.1
 scipy==1.0.1
