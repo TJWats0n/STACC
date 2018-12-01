@@ -40,7 +40,6 @@ def main():
                   'fav', 'url','tags']  # field names
         writer.writerow(fields)  # writes field
 
-        #file_name=
         with open(Config.data + file_name, 'r') as f:
             reader = csv.reader(f)
             city = Config.city
