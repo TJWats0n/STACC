@@ -1,16 +1,14 @@
-import schedule
-import time
+import schedule, time, os, math, threading, pickle
 from datetime import datetime, timedelta
 from config import Config
 import pandas as pd
 import numpy as np
-import math
 import analyse_crowded, preprocess_data, detect_crowded, tweet_collection, convertJson
-import threading
-import pickle
+
 
 def ceil_dt(dt, delta):
     return datetime.min + math.ceil((dt - datetime.min) / delta) * delta
+
 
 def get_file(path,file_name):
     # open timeseries file
@@ -21,19 +19,32 @@ def get_file(path,file_name):
 
     return pickle.load(file)
 
+
+def del_raw_data():  # raw_data can be deleted immediately as preprocessing is finished above in converJSON.main()
+    for file in os.listdir(Config.data):
+        file_path = os.path.join(Config.data, file)
+        os.remove(file_path)
+
+
+def del_prep_data():
+    all_file_pathes = [os.path.join(Config.prep_data, x) for x in os.listdir(Config.prep_data)]
+    for old_file in all_file_pathes[:-Config.interval]:
+        os.remove(old_file)
+
+
 def handler():
     t = pd.Timestamp(datetime.now())
-    latest_bucket = t.floor('{}min'.format(Config.interval)) #Assuming this will be very close to the (but still after) the wished timestamp
+    latest_bucket = t.floor('{}min'.format(Config.interval))  # Assuming this will be very close to the (but still after) the wished timestamp
     print('Analyse latest data.')
 
-    convertJson.main() #transform json format of most recent tweets to csv format
+    convertJson.main() # transform json format of most recent tweets to csv format
 
     tweets = preprocess_data.load_data()
 
     filtered_tweets = preprocess_data.filter_spam(tweets)
     grid_tweets = preprocess_data.calc_grid(filtered_tweets)
 
-    #create_time_series() can be used but here yields only one time slice
+    # create_time_series() can be used but here yields only one time slice
     # as the provided data is only the size of one interval
     timeslice, oldest = detect_crowded.create_time_series(grid_tweets)
 
@@ -41,7 +52,7 @@ def handler():
 
     np.append(timeseries, timeslice, axis=0)
 
-    #remove first timeframe of timeseries to keep consistent length
+    # To Do: remove first timeframe of timeseries to keep consistent length
 
     if len(timeseries) < Config.sliding_window:
         print('The timeseries is too small to detect crowded places. '
@@ -66,7 +77,10 @@ def handler():
 
     pickle.dump(master_object, open(Config.results+'master_object.p', 'wb'))
 
-    #some deletion logic for raw data and outdated prep data
+
+    del_raw_data() # some deletion logic for raw data and outdated prep data
+    del_prep_data()
+
 
     print('Processing for {0} finished. Next analysis is taking place at {1}'.format(latest_bucket, latest_bucket + Config.interval))
 
