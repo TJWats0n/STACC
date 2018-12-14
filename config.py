@@ -30,7 +30,7 @@ class Config:
         'k': 10,
         'sw': 'pyMABED/stopwords/twitter_en.txt',
         'sep': '\t',
-        'o': 'other_files/top_events.p',
+        'o': helper_files + '/top_events.p',
         'maf': 10,
         'mrf': 0.4,
         'tsl': 30,
@@ -40,7 +40,7 @@ class Config:
     }
 
     pyMABED_args_built_ui = {
-        'i': 'results/pyMABED_visu.p',
+        'i': results + '/pyMABED_visu.p',
         'o': '../results/ui'
     }
 
