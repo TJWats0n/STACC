@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from config import Config
+import pickle
 
 
 # ================================ helper functions ============================================
@@ -52,6 +53,8 @@ def create_time_series(tweets, interval=Config.interval, map_size=Config.map_siz
 
         #fill the timeseries from tweet corpus
         timeseries[timeframe,int(index[1][1]),int(index[1][0])] = row[0]
+
+    pickle.dump(timeseries, open(Config.helper_files + 'timeseries.p', 'wb'))
 
     return timeseries, first_bucket
 
