@@ -50,6 +50,10 @@ def handler():
 
     timeseries = get_file(Config.helper_files, 'timeseries.p')
 
+    sl_window = int((24/(Config.interval/60))*Config.sliding_window) # how many times does interval fit into day * sliding window
+
+    timeseries = timeseries[:-sl_window]  # trim timeseries to sliding window size
+
     np.append(timeseries, timeslice, axis=0)
 
     # To Do: remove first timeframe of timeseries to keep consistent length
