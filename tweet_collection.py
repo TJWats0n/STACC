@@ -9,26 +9,23 @@ from config import Config
 class Listener(StreamListener):
     current_date = datetime.strptime('2000-01-01', '%Y-%m-%d').date()
     date_for_file = '{}-{}-{}'.format(current_date.year, current_date.month, current_date.day)
-    file_per_day = 0
     filename = ''
 
     def on_data (self, data):
         while True:
             try:
                 now = datetime.now().date()
-                if Listener.current_date!= now:
+                if Listener.current_date != now:
                     Listener.current_date = now
                     Listener.date_for_file = '{}-{}-{}'.format(now.year, now.month, now.day)
-                    Listener.file_per_day = 0
-                    Listener.filename = 'tweets_{}_{}.csv'.format(Listener.date_for_file, Listener.file_per_day)
+                    Listener.filename = 'tweets_{}.csv'.format(Listener.date_for_file)
 
                 with open('{}/{}'.format(Config.data, Listener.filename), 'a+') as file:
                     csvwriter = csv.writer(file)
                     csvwriter.writerow([data])
 
                 if os.path.getsize('{}/{}'.format(Config.data, Listener.filename)) >= 80000000: #80MB
-                    Listener.file_per_day += 1
-                    Listener.filename = 'tweets_{}_{}.csv'.format(Listener.date_for_file, Listener.file_per_day)
+                    Listener.filename = 'tweets_{}.csv'.format(Listener.date_for_file)
 
             except Exception as e:
                 print('failed ondata,',str(e))
@@ -41,11 +38,14 @@ class Listener(StreamListener):
 
 
 
-def main():
+def main(delay = 0):
+
+    time.sleep(delay) # wait until time of first bucket is reached
+    print('Starting Tweet collection...')
 
     while True:
         for k,v in Config.API_keys.items():
-            print('switching to {}'.format(k))
+            print('API KEY: switching to {}'.format(k))
             
             auth = OAuthHandler(v['ckey'], v['csecret'])
             auth.set_access_token(v['atoken'], v['asecret'])

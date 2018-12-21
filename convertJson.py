@@ -33,7 +33,7 @@ def main():
     for file_name in [f for f in os.listdir(Config.data) if (f.endswith('.csv')) and (f.find('preprocessed') < 1)]:
 
         out_filename = file_name.split('.')[0] + '_preprocessed.csv'
-        csv_out = open(Config.prep_data + out_filename, mode='w')  # opens csv file to write to
+        csv_out = open(Config.prep_data + out_filename, mode='a')  # append if existent
         writer = csv.writer(csv_out, delimiter='\t')  # create the csv writer object
 
         fields = ['date', 'text', 'screen_name', 'followers', 'friends', 'country', 'place_name', 'lat', 'lon', 'rt',
