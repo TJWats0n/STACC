@@ -54,7 +54,8 @@ def create_time_series(tweets, interval=Config.interval, map_size=Config.map_siz
         #fill the timeseries from tweet corpus
         timeseries[timeframe,int(index[1][1]),int(index[1][0])] = row[0]
 
-    pickle.dump(timeseries, open(Config.helper_files + 'timeseries.p', 'wb'))
+    if Config.data_type == 'static':
+        pickle.dump(timeseries, open(Config.helper_files + 'timeseries.p', 'wb'))
 
     return timeseries, first_bucket
 
@@ -79,11 +80,9 @@ def determine_crowded_per_cell_timeseries(timeseries, real_time_flag=False):
 
             if real_time_flag == False:
                 for index, amount_tweets in enumerate(cell_timeseries):
-                    if index < window_size:
+                    if index < window_size: #for the first timeframes distribution of the first 'sliding-window timeframes' will be used
                         mean = np.mean(cell_timeseries[:window_size])
                         std = np.std(cell_timeseries[:window_size])
-                    #for the first timeframes distribution of
-                    # the first 'sliding-window timeframes' will be used
                     else:
                         mean = np.mean(cell_timeseries[(index - window_size):index])
                         std = np.std(cell_timeseries[(index - window_size):index])
@@ -93,9 +92,9 @@ def determine_crowded_per_cell_timeseries(timeseries, real_time_flag=False):
                     if 3 < z_score(mean, std, amount_tweets):
                         crowded_cells[(index, x, y)] = amount_tweets
             else:#check only last frame for new crowded places
-                mean = np.mean(cell_timeseries[:len(timeseries) - 1])
-                std = np.std(cell_timeseries[:len(timeseries) - 1])
-                amount_tweets = cell_timeseries[len(timeseries)]
+                mean = np.mean(cell_timeseries[:-1])
+                std = np.std(cell_timeseries[:-1])
+                amount_tweets = cell_timeseries[-1]
 
                 if amount_tweets < mean:
                     continue
