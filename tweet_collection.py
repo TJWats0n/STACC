@@ -1,22 +1,34 @@
 from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
-import time
-from real_time_config import RTConfig
-from cloudant.client import Cloudant
-from requests.adapters import HTTPAdapter
-import json
+from datetime import datetime
+import os, csv, time
+from config import Config
 
 
-class listener(StreamListener):
+class Listener(StreamListener):
+    current_date = datetime.strptime('2000-01-01', '%Y-%m-%d').date()
+    date_for_file = '{}-{}-{}'.format(current_date.year, current_date.month, current_date.day)
+    filename = ''
 
     def on_data (self, data):
         while True:
             try:
-                database.create_document(json.loads(data))
+                now = datetime.now().date()
+                if Listener.current_date != now:
+                    Listener.current_date = now
+                    Listener.date_for_file = '{}-{}-{}'.format(now.year, now.month, now.day)
+                    Listener.filename = 'tweets_{}.csv'.format(Listener.date_for_file)
+
+                with open('{}/{}'.format(Config.data, Listener.filename), 'a+') as file:
+                    csvwriter = csv.writer(file)
+                    csvwriter.writerow([data])
+
+                if os.path.getsize('{}/{}'.format(Config.data, Listener.filename)) >= 80000000: #80MB
+                    Listener.filename = 'tweets_{}.csv'.format(Listener.date_for_file)
+
             except Exception as e:
                 print('failed ondata,',str(e))
-                init_db()
                 time.sleep(5)
             break
 
@@ -25,31 +37,21 @@ class listener(StreamListener):
         return False
 
 
-def init_db():
-    print('Init DB')
-    global database
-    httpAdapter = HTTPAdapter(pool_connections=15, pool_maxsize=100)
-    client = Cloudant(RTConfig.cloudant_cred['username'],
-                      RTConfig.cloudant_cred['password'],
-                      url=RTConfig.cloudant_cred['url'],
-                      connect=True,
-                      adapter=httpAdapter)
 
-    database = client['streamed_tweets']
+def main(delay = 0):
 
+    time.sleep(delay) # wait until time of first bucket is reached
+    print('Starting Tweet collection...')
 
-def main():
-    init_db()
     while True:
-        for k,v in RTConfig.keys.items():
-            print('switching to {}'.format(k))
+        for k,v in Config.API_keys.items():
+            print('API KEY: switching to {}'.format(k))
             
             auth = OAuthHandler(v['ckey'], v['csecret'])
             auth.set_access_token(v['atoken'], v['asecret'])
             try:
-                twitterStream = Stream (auth, listener())
-                nyc_box = [-74.09523,40.720721,-73.832932,40.898463]
-                twitterStream.filter(locations=nyc_box)
+                twitterstream = Stream(auth, Listener())
+                twitterstream.filter(locations=Config.grid_box)
             except:
                 pass
 

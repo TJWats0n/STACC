@@ -1,20 +1,14 @@
-import preprocess_data
-import detect_crowded
-import convertJson
-import analyse_crowded
+import preprocess_data, detect_crowded, convertJson, analyse_crowded
 import pandas as pd
-import ast
-import pickle
-import json
+import ast, pickle, json
 from config import Config
-temp_files = 'other_files/'
 
 # ================================== Phase 1 - Load data ==========================================================
 
 # #transform tweets from JSON to csv format
 # #convertJson.main()
 
-previous_map_size = pickle.load(open('other_files/previous_map_size.p', 'rb'))
+previous_map_size = pickle.load(open(Config.helper_files + 'previous_map_size.p', 'rb'))
 
 if previous_map_size != Config.map_size:
     print('Mapsize was changed, therefore data must be preprocessed again. This can take a minute or two.')
@@ -25,14 +19,14 @@ if previous_map_size != Config.map_size:
 
     tweets = preprocess_data.calc_grid(tweets)
 
-    tweets.to_csv(temp_files+'tweets.csv', sep='\t', encoding='utf-8')
+    tweets.to_csv(Config.helper_files+'tweets.csv', sep='\t', encoding='utf-8')
 
-    pickle.dump(Config.map_size, open(temp_files+'previous_map_size.p', 'wb'))
+    pickle.dump(Config.map_size, open(Config.helper_files+'previous_map_size.p', 'wb'))
 
 # ================================== Phase 2 - Detect Crowded =====================================================
 print('Detecting crowd...')
 
-tweets = pd.read_csv(temp_files+'tweets.csv',
+tweets = pd.read_csv(Config.helper_files+'tweets.csv',
                          parse_dates={'datetime': ['date']},
                          converters={'grid': ast.literal_eval},  # without pandas would load tuple as type string
                          index_col='datetime',
@@ -46,15 +40,15 @@ crowded_places = detect_crowded.check_amount_tweets(crowded_places, first_bucket
 
 print('{} crowded places identified'.format(len(crowded_places)))
 
-pickle.dump(crowded_places, open(temp_files+'cp.p','wb'))
+pickle.dump(crowded_places, open(Config.helper_files+'cp.p','wb'))
 
 
 #================================== Phase 3 - Analyse Crowded =====================================================
 print('Analyse crowd...')
 
-crowded_places = pickle.load(open(temp_files+'cp.p', 'rb'))
+crowded_places = pickle.load(open(Config.helper_files+'cp.p', 'rb'))
 
-tweets = pd.read_csv(temp_files+'tweets.csv',
+tweets = pd.read_csv(Config.helper_files+'tweets.csv',
                          parse_dates={'datetime': ['date']},
                          converters={'grid': ast.literal_eval},  # without pandas would load tuple as type string
                          index_col='datetime',
