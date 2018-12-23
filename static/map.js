@@ -1,6 +1,7 @@
 var events_shown = false;
 var about_shown = false;
 var map;
+var baseURL = 'https://stacc-jk.herokuapp.com';
 
 //########################################################################
 // Init Stuff
@@ -19,7 +20,8 @@ window.onload = function init() {
   });
   map.addControl(new mapboxgl.AttributionControl(), 'top-right');
 
-  $.get('http://127.0.0.1:5000/api/v1.0/places', function(data) {
+    //http://127.0.0.1:5000 https://stacc-jk.herokuapp.com
+  $.get(`https://stacc-jk.herokuapp.com/api/v1.0/places`, function(data) {
     loadPlaces(data);
   })
   $('.details').css("margin-left", -$('#places_container').outerWidth());
@@ -71,10 +73,9 @@ window.onload = function init() {
 }//end of init()
 
 function loadPlaces(data) {
-  console.log('orig data', data);
   for (item in data) {
-    text = "Date & Time: <br>" + new Date(data[item]['timestamp']).toISOString().slice(0,10) +
-      "<br>Place: <br>" + data[item]['x'] + ',' + data[item]['y']
+    text = "Date: " + new Date(data[item]['timestamp']).toISOString().slice(0,10) +
+      "<br>Area: " + data[item]['x'] + ',' + data[item]['y']
     //create elements in template string, put them in array and
     // push the array as one(!) thing to the dom -> more efficient
     event_ = document.createElement('div');
@@ -114,18 +115,19 @@ function toggleAbout() {
 
 
 function loadAbout() {
-  about_text = "This demo shows the capabilities of ACC a system to detect Anomalous\
-  Croded Places. It helps urban planners to automatically get information about\
-  what is happening in their city. The System was built was build by Julian Kopp\
-  for his Bachelor Thesis supervised by Haytham Assem. \n The click on a place \
-  in the left navigation bar. For the clicked place occured topics will be shown \
-  in the slide out window. Additionally The area of the event is visualised on the\
-  map."
+  about_text = "<p>This website shows the capabilities of STACC, an algorithm to assist in urban planning.\
+STACC detects unusual crowded places and provides context information on why the place is crowded.\
+This helps urban planners to understand occurring incidents and assess consequences. Click on any event\
+and see topics which where present at place and time of the detected event. The System was\
+built was build by Julian Kopp in the course of his Bachelor Thesis supervised by Haytham Assem.\
+You can watch a quick demo video, see the <a href='https://github.com/TJWats0n/STACC'>code base</a> or\
+read the <a href='https://drive.google.com/uc?export=view&id=1NF8yhsbh1ij1tdIiVDlIQmerQdddLPJF'>research paper</a>.</p>"
+
 
   $(".titleII").text("About ACC");
   about_card = document.createElement('div');
   $(about_card).addClass("card text-white bg-dark about")
-    .text(about_text)
+    .html(about_text)
   $("#details_container").append(about_card);
   showDetails("about");
 }
@@ -163,10 +165,10 @@ function loadPlaceDetails(elementID) {
   amount = $('#' + elementID).attr('amount');
 
   //http://127.0.0.1:5000/api/v1.0/events/'2018-04-15%2000:00:00'/1.0/1.0/63
-  api_call = `http://127.0.0.1:5000/api/v1.0/events/${timestamp}/${x}/${y}/${amount}`
+
+  api_call = `https://stacc-jk.herokuapp.com/api/v1.0/events/${timestamp}/${x}/${y}/${amount}`
 
   $.get(api_call, function(data) {
-    console.log(data);
     showPlaceDetails(data, timestamp, x, y, amount);
   })
   drawCell(x,y);
@@ -176,12 +178,14 @@ function showPlaceDetails(data, timestamp, x, y, amount){
   if (about_shown === true || events_shown === true){
     hideDetails();
   }
-    $(".titleII").text(`Events at ${timestamp} in (${x},${y})`);
+  date = String(timestamp).slice(0,10)
+  time = String(timestamp).slice(11,21)
+    $(".titleII").html(`<p id='titleII'>Events at ${date} ${time} in (${x},${y})</p>`);
     for (item in data) {
       start = new Date(data[item]['start_end'][0]).toISOString().slice(11,16);
       end = new Date(data[item]['start_end'][1]).toISOString().slice(11,16);
 
-      text = "Start - End:<br> " + start + " - " + end +
+      text = "Start - End: " + start + " - " + end +
         "\n <br>Main Words: <br> " + data[item]['main_words'].join(', ') +
         "\n <br>Rel Words: <br>" + data[item]['rel_words'].join(', ')
       event_ = document.createElement('div');

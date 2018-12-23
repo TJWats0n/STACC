@@ -162,3 +162,13 @@ a.mapboxgl-ctrl-logo{
   display: inline-block;
   cursor: pointer;
 }
+
+#instruction{
+  font-size: 1.5vmax;
+  margin-bottom: auto;
+}
+
+#titleII{
+  margin-top: 1vmax;
+  margin-bottom: auto;
+}
