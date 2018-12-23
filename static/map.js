@@ -115,13 +115,13 @@ function toggleAbout() {
 
 
 function loadAbout() {
-  about_text = "<p>This website shows the capabilities of STACC, an algorithm to assist in urban planning.\
-STACC detects unusual crowded places and provides context information on why the place is crowded.\
-This helps urban planners to understand occurring incidents and assess consequences. Click on any event\
-and see topics which where present at place and time of the detected event. The System was\
-built was build by Julian Kopp in the course of his Bachelor Thesis supervised by Haytham Assem.\
-You can watch a quick demo video, see the <a href='https://github.com/TJWats0n/STACC'>code base</a> or\
-read the <a href='https://drive.google.com/uc?export=view&id=1NF8yhsbh1ij1tdIiVDlIQmerQdddLPJF'>research paper</a>.</p>"
+  about_text = "<p>This website shows the capabilities of STACC, an algorithm to assist in urban planning. \
+STACC detects unusual crowded places and provides context information on why the place is crowded. \
+This helps urban planners to understand occurring incidents and assess consequences. Click on any event \
+and see topics which where present at place and time of the detected event. The System was \
+built was build by Julian Kopp in the course of his Bachelor Thesis supervised by Haytham Assem. \
+You can watch a quick demo video, see the <a href='https://github.com/TJWats0n/STACC' target="_blank">code base</a> or \
+read the <a href='https://drive.google.com/uc?export=view&id=1NF8yhsbh1ij1tdIiVDlIQmerQdddLPJF' target="_blank">research paper</a>.</p>"
 
 
   $(".titleII").text("About ACC");
