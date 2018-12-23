@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, render_template
-import pickle
+import pickle, os
 from config import Config
 import pandas as pd
 from collections import OrderedDict
@@ -77,8 +77,7 @@ def events_helper(key):
 
 def load_file():
     try:
-        with open(Config.results + 'master_object.p', 'rb') as file:
-            return pickle.load(file)
+        return pickle.load(open(os.path.join(Config.results, 'master_object.p'), 'rb'))
     except FileNotFoundError:
         return
 
