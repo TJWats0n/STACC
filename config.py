@@ -47,9 +47,9 @@ class Config:
     # Twitter API keys
     API_keys = {
         'jk': {
-            'ckey': '9sjG3qaG7QTl1I0BvVXztMWHB',
-            'csecret': 'piB2RnsQvOe99BZqFFTJawwkhEqrgop8XhJeQ1a9ihHeBBmmXS',
-            'atoken': '4353511715-75aoTofgrOYguk5MRLmUrbn1n6iVBVmwduHGPpW',
-            'asecret': '4qEllHZzXRZUdwf7Q42GV8FISO0z2O6w47Bpm67z6kCao',
+            'ckey': 'xxxx',
+            'csecret': 'xxxx',
+            'atoken': 'xxxx',
+            'asecret': 'xxxx',
         }
     }
